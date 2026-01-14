@@ -21,16 +21,6 @@ func main() {
 		w.Write(data)
 	})
 
-	http.HandleFunc("/tsuita.png", func(w http.ResponseWriter, r *http.Request) {
-		data, err := content.ReadFile("tsuita.png")
-		if err != nil {
-			http.Error(w, "Image not found", http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "image/png")
-		w.Write(data)
-	})
-
 	port := ":8080"
 	fmt.Printf("🚀 Server running at http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, nil))
