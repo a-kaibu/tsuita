@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 )
@@ -11,14 +12,20 @@ import (
 var content embed.FS
 
 func main() {
+	fileServer := http.FileServer(http.FS(content))
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		data, err := content.ReadFile("index.html")
-		if err != nil {
-			http.Error(w, "Page not found", http.StatusNotFound)
+		if r.URL.Path == "/" {
+			data, err := fs.ReadFile(content, "index.html")
+			if err != nil {
+				http.Error(w, "Page not found", http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write(data)
 			return
 		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write(data)
+		fileServer.ServeHTTP(w, r)
 	})
 
 	port := ":8080"
